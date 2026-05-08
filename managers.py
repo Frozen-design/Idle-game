@@ -1,76 +1,73 @@
-from resources import Resource
-
-class Money:
-    def __init__(self) -> None:
-        # amount of money (currency)
-        pass
-
-class Materials:
-    def __init__(self) -> None:
-        # name, quantity
-        pass
-
-class Crafts:
-    def __init__(self) -> None:
-        # name, material, cost, quantity, value
-        # crafts sell for money
-        pass
-
-class Producers:
-    def __init__(self) -> None:
-        # name, material produced, how often 
-        pass
-
-class Crafters:
-    def __init__(self) -> None:
-        # name, material crafted, how often
-        pass
-
 class ResourceManager:
     def __init__(self) -> None:
         # {resource name: {cost: [{name: "__name__", quantity: #}], "produces": [{"name": "", "quantity": #}], quantity: #}}
-        self.amount = {"wood": 0, "money": 0, "loggers": 0}
-        self.resources = {"wood": Resource("wood", None, 0, "wood", 1, 0), "loggers": Resource("loggers", "money", 10, "wood", 1, 10)}
+        self.money = 0
+        self.materials = {"wood": 0}
+        self.crafts = {"ducks": {"cost": {"material": "wood", "amount": 1}, "value": 10, "quantity": 0}}
+        self.producers = {"loggers": {"cost": 10, "produces": {"material": "wood", "amount": 1}, "quantity": 0}}
+        self.crafters = {"duck smiths": {"cost": 10, "produces": {"craft": "ducks", "amount": 1}, "quantity": 0}}
         pass
 
-    def get_amount(self, resource):
-        return self.amount[resource]
+    # -----------------
+    # Money functions -
+    # -----------------
+    def add_money(self, amount):
+        self.money += amount
+
+    def money_check(self, amount:int) -> bool:
+        return self.money >= amount and amount > 0
     
-    def remove(self, resource, quantity):
-        self.amount[resource] -= quantity
-
-    def add(self, resource, quantity):
-        self.amount[resource] += quantity
-
-    def can_remove_resource(self, resource, quantity):
-        return self.get_amount(resource) > quantity and quantity > 0
-
-    def sell_wood(self, quantity):
-        resource_name = "wood"
-        resource_value = 1
-        if self.can_remove_resource(resource_name, quantity):
-            self.remove(resource_name, quantity)
-            self.add("money", quantity * resource_value)
+    # --------------------
+    # Material functions -
+    # --------------------
+    def add_material(self, material:str, amount:int):
+        self.materials[material] += amount
     
-class WorkManager:
-    def __init__(self, rs_manager:ResourceManager) -> None:
-        self.resources = rs_manager
-        # {worker name: {resource name: "__name__", quantity: #, cooldown: # of seconds}}
-        self.workers = {"log cutter": {"cost": 10, "resource_name": "wood", "quantity": 0, "cooldown" : 10}}
-
+    def material_check(self, material:str, amount:int) -> bool:
+        return self.materials[material] >= amount and amount > 0
     
-
-    def buy_workers(self, worker_name, amount):
-        cost = self.workers[worker_name]["cost"] * amount
-        resource_name = "money"
-        if self.resources.can_remove_resource(resource_name, cost):
-            self.resources.remove(resource_name, cost)
-            self.workers[worker_name]["quantity"] += amount
+    # -----------------
+    # Craft functions -
+    # -----------------
+    def craft_check(self, craft:str, amount:int) -> bool:
+        return self.crafts[craft]["quantity"] >= amount and amount > 0
     
+    def can_craft(self, craft:str, amount:int) -> bool:
+        cost = self.crafts[craft]["cost"]
+        material, m_amount = (cost["material"], cost["amount"] * amount)
+        return self.material_check(material, m_amount)
+    
+    def can_sell(self, craft:str, amount:int) -> bool:
+        return self.craft_check(craft, amount)
+
+    def add_craft(self, craft:str, amount:int):
+        cost = self.crafts[craft]["cost"]
+        material, m_amount = (cost["material"], cost["amount"] * amount)
+        if self.material_check(material, m_amount):
+            self.materials[material] -= m_amount
+
+    def sell_craft(self, craft:str, amount:int):
+        if self.can_sell(craft, amount):
+            value = self.crafts[craft]["value"]
+            self.money += value * amount
+            self.crafts[craft]["quantity"] += amount
+
+    # ------------------
+    # Worker functions -
+    # ------------------
+    def can_buy(self, worker:str, amount:int) -> bool:
+        cost = self.crafters[worker]["cost"] * amount
+        return self.money_check(cost)
+    
+    def buy_worker(self, worker:str, amount:int):
+        if self.can_buy(worker, amount):
+            cost = self.crafters[worker]["cost"]
+            self.money -= cost * amount
+            if worker in self.crafters.keys():
+                self.crafters[worker]["quantity"] += amount
+            elif worker in self.producers.keys():
+                self.producers[worker]["quantity"] += amount
+
 
 if __name__ == "__main__":
     rs_manager = ResourceManager()
-    rs_manager.add("wood", 10)
-    print(rs_manager.get_amount("wood"), rs_manager.get_amount("money"))
-    rs_manager.sell_wood(7)
-    print(rs_manager.get_amount("wood"), rs_manager.get_amount("money"))
