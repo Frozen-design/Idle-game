@@ -1,5 +1,6 @@
 import pygame
 from buttons import *
+from managers import *
 
 class Window:
     def __init__(self, width, height):
@@ -75,13 +76,20 @@ class GameScreen(Screen):
         
     def setup(self):
         self.event_checks.append(self.increment_click) # type: ignore
-        button = Button((100, 100), (50, 20), "brown")
-        self.first_button = VarButton(button, "wood", "Chop wood")
+        self.rs_manager = ResourceManager()
+        rsm_info = {"rs_manager": self.rs_manager}
+        wood_button_colors = {"inner_color": pygame.Color(103, 68, 34), "outer_color": "brown", "text_color": "white"}
+        self.first_button = StylizedButton((100, 100), (100, 40), text = "Chop Wood", **wood_button_colors, **rsm_info, rs_name = "wood")
+        self.worker_button = StylizedButton((100, 200), (100, 40), text = "Worker", **rsm_info, rs_name = "loggers")
+        self.event_checks.append(self.first_button.click_event)
+        self.event_checks.append(self.worker_button.click_event)
 
     def update(self):
         self.window.surface.fill("dark grey")
         self.first_button.draw(self.window.surface)
         self.first_button.draw_value(self.window.surface)
+        self.worker_button.draw(self.window.surface)
+        self.worker_button.draw_value(self.window.surface)
 
     def increment_click(self, event:pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONUP:
