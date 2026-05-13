@@ -10,32 +10,6 @@ class Button:
 
     def check_click(self, xy):
         return self.rect.collidepoint(xy)
-    
-class VarButton:
-    def __init__(self, button:Button, name, desc):
-        self.button = button
-        self.name = name
-        self.value = 0
-        self.description = desc
-
-    def check_click(self, xy):
-        if self.button.check_click(xy):
-            self.value += 1
-
-    def draw(self, surface:pygame.Surface):
-        self.button.draw(surface)
-        rect = self.button.rect
-        font = pygame.font.SysFont("Arial", size = 20)
-        font_surf = font.render(self.name, True, "White")
-        font_rect = font_surf.get_rect(center = rect.center)
-        surface.blit(font_surf, font_rect)
-
-    def draw_value(self, surface):
-        rect = self.button.rect
-        font = pygame.font.Font(None, size = 20)
-        font_surf = font.render(str(self.value), True, "Black")
-        font_rect = font_surf.get_rect(center = [a + b for a, b in zip(rect.center, [0, -rect.height])])
-        surface.blit(font_surf, font_rect)
 
 class StylizedButton(Button):
     def __init__(self, xy, size, **kwargs):
@@ -70,7 +44,7 @@ class StylizedButton(Button):
                 rect = self.rect
                 font = pygame.font.SysFont(self.font_name, size = 20)
                 font_surf = font.render(str(value), True, "Black")
-                font_rect = font_surf.get_rect(center = [a + b for a, b in zip(rect.center, [0, -rect.height])])
+                font_rect = font_surf.get_rect(midleft = [a + b for a, b in zip(rect.center, [rect.width * 2 // 3, 0])])
                 surface.blit(font_surf, font_rect)
 
     def click_event(self, event):

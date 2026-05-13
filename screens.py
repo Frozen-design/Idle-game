@@ -1,6 +1,7 @@
 import pygame
 from buttons import *
 from managers import *
+from shapes import *
 
 class Window:
     def __init__(self, width, height):
@@ -28,8 +29,11 @@ class Screen:
     def __init__(self, manager:ScreenManager, window: Window):
         self.manager = manager
         self.window = window
-        self.event_checks = [self.exit_check]
+        self.surface = window.surface
         self.active = True
+
+    def check_events(self, event):
+        pass
     
     def exit_check(self, event):
         if event.type == pygame.QUIT:
@@ -49,10 +53,10 @@ class Screen:
         self.setup()
         while self.active:
             for event in pygame.event.get():
-                for funct in self.event_checks:
-                    new_screen = funct(event)
-                    if new_screen:
-                        self.active = False
+                self.exit_check(event)
+                new_screen = self.check_events(event)
+                if new_screen:
+                    self.active = False
             self.update()
             self.window.flip()
             self.window.clock.tick(60)
@@ -61,10 +65,14 @@ class Screen:
 class MainMenu(Screen):
     def __init__(self, manager, window: Window):
         super().__init__(manager, window)
-        self.event_checks.append(self.switch_to_game) # type: ignore
 
     def update(self):
         self.window.surface.fill("dark blue")
+
+    def check_events(self, event): # type: ignore
+        switch_event = self.switch_to_game(event)
+        if switch_event != None:
+            return switch_event
 
     def switch_to_game(self, event:pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONUP:
@@ -75,22 +83,19 @@ class GameScreen(Screen):
         super().__init__(manager, window)
         
     def setup(self):
-        self.event_checks.append(self.increment_click) # type: ignore
         self.rs_manager = ResourceManager()
         rsm_info = {"rs_manager": self.rs_manager}
         wood_button_colors = {"inner_color": pygame.Color(103, 68, 34), "outer_color": "brown", "text_color": "white"}
-        self.first_button = StylizedButton((100, 100), (100, 40), text = "Chop Wood", **wood_button_colors, **rsm_info, rs_name = "wood")
-        self.worker_button = StylizedButton((100, 200), (100, 40), text = "Worker", **rsm_info, rs_name = "loggers")
-        self.event_checks.append(self.first_button.click_event)
-        self.event_checks.append(self.worker_button.click_event)
+        self.wood_button    = StylizedButton((100, 100), (100, 40)   , text = "Chop Wood", rs_name = "wood"   , **wood_button_colors, **rsm_info)
+        self.logger_button  = StylizedButton((100, 200), (100, 40)   , text = "Loggers"  , rs_name = "loggers", **rsm_info)
+
+    def check_events(self, event):
+        self.wood_button.click_event(event)
+        self.logger_button.click_event(event)
 
     def update(self):
         self.window.surface.fill("dark grey")
-        self.first_button.draw(self.window.surface)
-        self.first_button.draw_value(self.window.surface)
-        self.worker_button.draw(self.window.surface)
-        self.worker_button.draw_value(self.window.surface)
-
-    def increment_click(self, event:pygame.event.Event):
-        if event.type == pygame.MOUSEBUTTONUP:
-            self.first_button.check_click(event.pos)
+        self.wood_button.draw(self.surface)
+        self.wood_button.draw_value(self.surface)
+        self.logger_button.draw(self.surface)
+        self.logger_button.draw_value(self.surface)
