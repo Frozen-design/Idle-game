@@ -83,11 +83,9 @@ class GameScreen(Screen):
         super().__init__(manager, window)
         
     def setup(self):
-        self.rs_manager = ResourceManager()
-        rsm_info = {"rs_manager": self.rs_manager}
         wood_button_colors = {"inner_color": pygame.Color(103, 68, 34), "outer_color": "brown", "text_color": "white"}
-        self.wood_button    = StylizedButton((100, 100), (100, 40)   , text = "Chop Wood", rs_name = "wood"   , **wood_button_colors, **rsm_info)
-        self.logger_button  = StylizedButton((100, 200), (100, 40)   , text = "Loggers"  , rs_name = "loggers", **rsm_info)
+        self.wood_button    = StylizedButton((100, 100), (100, 40)   , text = "Chop Wood", **wood_button_colors)
+        self.logger_button  = StylizedButton((100, 200), (100, 40)   , text = "Loggers"  , **wood_button_colors)
 
     def check_events(self, event):
         self.wood_button.click_event(event)
