@@ -21,8 +21,7 @@ class StylizedButton(Button):
         self.text = kwargs.get("text", "N/A")
         self.text_color = kwargs.get("text_color", "black")
         self.font_name = self.kwargs.get("font_name", "Arial")
-        self.rs_manager = kwargs.get("rs_manager", None)
-        self.rs_name = kwargs.get("rs_name", None)
+        self.function = kwargs.get("function", None)
 
     def draw(self, surface):
         pygame.draw.rect(surface, self.color, self.rect, border_radius=5)
@@ -37,17 +36,7 @@ class StylizedButton(Button):
         font_sfc = font.render(self.text, True, self.text_color)
         surface.blit(font_sfc, font_sfc.get_rect(center = self.rect.center))
 
-    def draw_value(self, surface):
-        if self.rs_name and self.rs_manager:
-            value = self.rs_manager.get_quantity(self.rs_name)
-            if value != None:
-                rect = self.rect
-                font = pygame.font.SysFont(self.font_name, size = 20)
-                font_surf = font.render(str(value), True, "Black")
-                font_rect = font_surf.get_rect(midleft = [a + b for a, b in zip(rect.center, [rect.width * 2 // 3, 0])])
-                surface.blit(font_surf, font_rect)
-
     def click_event(self, event):
         if event.type == pygame.MOUSEBUTTONUP:
-            if self.check_click(event.pos) and self.rs_manager:
-                self.rs_manager.add_quantity(self.rs_name, 1)
+            if self.check_click(event.pos) and self.function != None:
+                self.function()

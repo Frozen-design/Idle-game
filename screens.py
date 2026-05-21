@@ -84,6 +84,7 @@ class GameScreen(Screen):
         
     def setup(self):
         wood_button_colors = {"inner_color": pygame.Color(103, 68, 34), "outer_color": "brown", "text_color": "white"}
+        #Spawner()
         self.wood_button    = StylizedButton((100, 100), (100, 40)   , text = "Chop Wood", **wood_button_colors)
         self.logger_button  = StylizedButton((100, 200), (100, 40)   , text = "Loggers"  , **wood_button_colors)
 
@@ -94,6 +95,5 @@ class GameScreen(Screen):
     def update(self):
         self.window.surface.fill("dark grey")
         self.wood_button.draw(self.surface)
-        self.wood_button.draw_value(self.surface)
         self.logger_button.draw(self.surface)
-        self.logger_button.draw_value(self.surface)
+        
